@@ -50,8 +50,13 @@ class TCPServer():
     def create_ships(self):
         
         self.ships['porta-aviões'] = {
-            'inicio': 
+            'inicio': (random.randrange(0, 5), random.randrange(0, 10))
         }
+        
+        self.ships['porta-aviões'] = {
+            'fim': (self.ships['porta-aviões'][0]+5, self.ships['porta-aviões'][1])
+        }
+
         return
 
 
