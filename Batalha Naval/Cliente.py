@@ -40,7 +40,7 @@ class TCPClient():
                         print('MAYDAY MAYDAY! Ship sunk....')
                         self.ships.pop(key)
                     return True
-        self.grid[x][y] = 'X'
+        self.grid[x][y] = 'X' if self.grid[x][y] != 'HIT' else self.grid[x][y]
         return False
 
     def print_grids(self):
@@ -82,7 +82,7 @@ class TCPClient():
                 self.server_grid[request['x']][request['y']] =  'HIT'
             else: 
                 print('DANG!')
-                self.server_grid[request['x']][request['y']] =  'X'
+                self.server_grid[request['x']][request['y']] =  'X' if self.server_grid[request['x']][request['y']] != 'HIT' else self.server_grid[request['x']][request['y']]
             
             if data['gameover']: 
                 print('GAMEOVER, YOU WON!')
@@ -172,7 +172,6 @@ class TCPClient():
                                             self.ships[key]['inicio'][0] >=self.ships[navio]['fim'][0] >= self.ships[key]['inicio'][0]):
                                     intercecao = True
                                     print('Interceção de Navios')
-                                    break
                     self.posiciona_no_campo(navio, size,orientacao)
                     print('\t{} posicionado!'.format(navio))
     

@@ -30,9 +30,7 @@ class TCPServer():
         print('On HOST {} listening to PORT {}'.format(self.HOST, self.PORT))
 
     def start(self):
-        self.create_ships()
-        print('ships created')
-        self.print_grid()
+        
         begining = time.time()
         print('Start at', begining)
         while True:
@@ -132,29 +130,25 @@ class TCPServer():
                                         (self.ships[key]['inicio'][0] >=self.ships[navio]['inicio'][0] >= self.ships[key]['inicio'][0] or \
                                             self.ships[key]['inicio'][0] >=self.ships[navio]['fim'][0] >= self.ships[key]['inicio'][0]):
                                     intercecao = True
-                                    print('Interceção de Navios')
-                                    break
-                    self.posiciona_no_campo(navio, orientacao)
-                    print('\t{} posicionado!'.format(navio))
+                self.posiciona_no_campo(navio, orientacao)
+                print('\t{} posicionado!'.format(navio))
 
     def posiciona_no_campo(self, navio, orientacao):
         if orientacao:
-            for x in range(self.ships[navio]['inicio'][0],self.ships[navio]['fim'][0]):
+            for x in range(self.ships[navio]['inicio'][0],self.ships[navio]['fim'][0]+1):
                 self.grid[x][self.ships[navio]['inicio'][1]] = "O"
         else:
-            for y in range(self.ships[navio]['inicio'][1], self.ships[navio]['fim'][1]):
+            for y in range(self.ships[navio]['inicio'][1], self.ships[navio]['fim'][1]+1):
                 self.grid[self.ships[navio]['inicio'][0]][y] = "O"
         pass
 
     def is_hit(self, x, y):
-        
         for key in self.ships.keys():
-            print('is {} hit?'.format(key))
             if y == self.ships[key]['inicio'][1] and\
                 (self.ships[key]['fim'][0] >= x and\
                  x >= self.ships[key]['inicio'][0]):
                 if '{},{}'.format(x,y) not in self.ships[key]['hits']:
-                    print('HIT!')
+                    print('{} was HIT!'.format(key))
                     self.ships[key]['hits'].append('{},{}'.format(x,y))
                     if len(self.ships[key]['hits']) == self.ships[key]['size']:
                         print('ship sunk')
@@ -173,6 +167,9 @@ class TCPServer():
 
     def game(self, con, client):
         print('Playing with', client)
+        self.create_ships()
+        print('ships created')
+        self.print_grid()
         while True:
             msg = con.recv(4096)
             if not msg:
@@ -182,6 +179,7 @@ class TCPServer():
             print(data)
             hit = self.is_hit(data['x'], data['y'])
             x, y = self.shoot()
+            print(len(self.ships))
             response = {
                 'hit': hit,
                 'x': x,
