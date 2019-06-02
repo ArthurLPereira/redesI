@@ -37,7 +37,7 @@ class TCPServer():
         while True:
             elapsed = time.time() - begining
             con, client = self.tcp.accept()
-            if elapsed > 300:
+            if elapsed > 1800:
                 con.close()
                 raise TimeoutError(elapsed)
             
@@ -60,9 +60,9 @@ class TCPServer():
             'hits': [],
             'size': 5
         }
-        self.ships['porta-aviao'] = {
+        self.ships['porta-aviao'].update({
             'fim': (self.ships['porta-aviao']['inicio'][0]+4, self.ships['porta-aviao']['inicio'][1])
-        }
+        })
             
         print('\tporta-aviao posicionado')
 
@@ -78,9 +78,9 @@ class TCPServer():
                     'size': size
                 }
                 
-                self.ships[navio] = {
+                self.ships[navio].update({
                     'fim': (self.ships[navio]['inicio'][0]+size-1, self.ships[navio]['inicio'][1])
-                }
+                })
                 intercecao = False
                 for key in self.ships.keys():
                     if key != navio:
@@ -103,9 +103,9 @@ class TCPServer():
                     'size': size
                 }
                 
-                self.ships[navio] = {
+                self.ships[navio].update({
                     'fim': (self.ships[navio]['inicio'][0]+size-1, self.ships[navio]['inicio'][1])
-                }
+                })
 
                 intercecao = False
                 for key in self.ships.keys():
@@ -129,9 +129,9 @@ class TCPServer():
                     'size': size
                 }
                 
-                self.ships[navio] = {
+                self.ships[navio].update({
                     'fim': (self.ships[navio]['inicio'][0]+size-1, self.ships[navio]['inicio'][1])
-                }
+                })
 
                 intercecao = False
                 for key in self.ships.keys():
@@ -142,15 +142,28 @@ class TCPServer():
                                 intercecao = True
                                 break
             print('\t{} posicionado'.format(navio))
+        # print(self.ships)
         return    
 
+    def posiciona_no_campo(self, navio):
+        if orientacao:
+            for x in range(self.ships[navio]['inicio'][0],self.ships[navio]['fim'][0]):
+                self.grid[x][self.ships[navio]['inicio'][1]] = "O"
+        else:
+            for y in range(self.ships[navio]['inicio'][1], self.ships[navio]['fim'][1]):
+                self.grid[self.ships[navio]['inicio'][0]][y] = "O"
+        pass
+
     def is_hit(self, x, y):
+        
         for key in self.ships.keys():
-            if y == self.ships[key]['inicio'][0] and\
+            print('is {} hit?'.format(key))
+            if y == self.ships[key]['inicio'][1] and\
                 (self.ships[key]['inicio'][0] >= x and\
                  x >= self.ships[key]['inicio'][0]):
-                if x+','+y not in self.ships[key]['hits']:
-                    self.ships[key]['hits'].append(x+','+y)
+                if '{},{}'.format(x,y) not in self.ships[key]['hits']:
+                    print('HIT!')
+                    self.ships[key]['hits'].append('{},{}'.format(x,y))
                     if len(self.ships[key]['hits']) == self.ships[key]['size']:
                         print('ship sunk')
                         self.ships.pop(key)
@@ -161,8 +174,8 @@ class TCPServer():
         while True:
             x = random.randrange(0, 10)
             y = random.randrange(0, 10)
-            translated = x+','+y
-            if translated not in shots:
+            translated = '{},{}'.format(x,y)
+            if translated not in self.shots:
                 self.shots.append(translated)
                 return x, y
 
@@ -173,15 +186,17 @@ class TCPServer():
             if not msg:
                 raise Exception('EMPTY MESSAGE')
 
-            data = json.loads(msg)
+            data = json.loads(msg.decode())
+            print(data)
             hit = self.is_hit(data['x'], data['y'])
             x, y = self.shoot()
             response = {
                 'hit': hit,
                 'x': x,
-                'y': y
+                'y': y,
+                'gameover': len(self.ships) == 0
             }
-            con.send(json.dumps(response))
+            con.send((str.encode(json.dumps(response))))
 
             
 

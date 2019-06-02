@@ -9,7 +9,7 @@ class TCPClient():
         if port is None:
             raise Exception('MISSING ARGUMENTS')
         
-        self.ships = []
+        self.ships = {}
         self.grid = [[' ' for i in range(10)] for j in range(10)]
         self.server_grid = [[' ' for i in range(10)] for j in range(10)]
         self.tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,25 +22,36 @@ class TCPClient():
         print('Connected to {}:{}'.format(self.HOST, self.PORT))
         self.play()
 
-    def read_coords(self):
+    def read_coords(self, axis):
         while True:
-            x = input()
-            if x > 0 and x < 9:
+            x = int(input('{}:'.format(axis)))
+            if x >= 0 and x < 10:
                 return x
 
     def is_hit(self, x, y):
         for key in self.ships.keys():
             if self.ships[key]['fim'][1] >= y >= self.ships[key]['fim'][1] and\
                 self.ships[key]['inicio'][0] >= x >= self.ships[key]['fim'][0]:
-                if str(x+','+y) not in self.ships[key]['hits']:
-                    self.ships[key]['hits'].append(str(x+','+y))
+                if str('{},{}'.format(x,y)) not in self.ships[key]['hits']:
+                    self.ships[key]['hits'].append(str('{},{}'.format(x,y)))
+                    print('Oh no, {} got hit!'.format(key))
                     grid[x][y] = 'HIT'
                     if len(self.ships[key]['hits']) == self.ships[key]['size']:
-                        print('ship sunk')
+                        print('MAYDAY MAYDAY! Ship sunk....')
                         self.ships.pop(key)
                     return True
         self.grid[x][y] = 'X'
         return False
+
+    def print_grids(self):
+        print('Campo Adversário')
+        print('y/x', '\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t'.format(*range(10)))
+        for y in range(10):
+            print(y, '|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|'.format(*[self.server_grid[x][y] for x in range(10)]))
+        print("\nSeu Campo")
+        print('y/x', '\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t'.format(*range(10)))
+        for y in range(10):
+            print(y, '|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|'.format(*[self.grid[x][y] for x in range(10)]))
 
     def play(self):
 
@@ -48,29 +59,42 @@ class TCPClient():
         print('Posicione sua Frota!')
         self.read_boats()
         print("Pressione enter para continuar!")
-        msg = input()
+        msg = input().upper()
         while msg != '\x18':
             
-            while msg != 'A':
-                # print(matriz)
-                msg = input()
+            while msg != 'A' and msg != '\x18':
+                self.print_grids()
+                msg = input().upper()
+            
+            if msg == '\x18': break
             
             request = {
-                'x': read_coords(),
-                'y': read_coords()
+                'x': self.read_coords('x'),
+                'y': self.read_coords('y')
             }
-            tcp.send(json.dumps(request))
-            
-            data = tcp.recv(4096)
-            data = json.loads(data)
+            self.tcp.send(str.encode(json.dumps(request)))
+            print('sent')
+            data = self.tcp.recv(4096)
+            data = json.loads(data.decode())
+            print(data)
             if data.get('hit', False):
+                print('YASSSS!')
                 self.server_grid[request['x']][request['y']] =  'HIT'
             else: 
+                print('DANG!')
                 self.server_grid[request['x']][request['y']] =  'X'
+            
+            if data['gameover']: 
+                print('GAMEOVER, YOU WON!')
+                break
+            self.is_hit(data['x'], data['y'])
 
-            msg = input()
-                
-        tcp.close()
+            if len(self.ships) == 0:
+                print('ABANDON SHIP, WE\'RE GOING DOWN!!!')
+                print('GAMEOVER, YOU LOST!')
+                break
+            msg = input().upper()             
+        self.tcp.close()
 
 
     def read_boats(self):
@@ -79,21 +103,22 @@ class TCPClient():
         
         for barco in lista_barcos:
             for i in range(barco['quantia']):
-                navio = barco['nome'] + i
+                navio = barco['nome']+str(i)
+                print("\tposicionando {}".format(navio))
                 size = barco['size']
                 intercecao = True
                 while intercecao:
-                    x = input('x:')
-                    y = input('y:')
-                    vertical = input('Orientacao(1 para horizontal e 0 para vertical):')
+                    x = int(input('\t x:'))
+                    y = int(input('\t y:'))
+                    orientacao = bool(int(input('\t Orientacao(1 para horizontal e 0 para viertical):')))
                     posicionado = False
                     while not posicionado:
                         if x>= 0:
                             if x < 10:
                                 if y >= 0:
                                     if y < 10:
-                                        if vertical:
-                                            if x+size < 10:
+                                        if orientacao:
+                                            if x+size-1 < 10:
                                                 self.ships[navio] = {
                                                     'inicio': (x, y),
                                                     'fim': (x+size, y),
@@ -111,7 +136,7 @@ class TCPClient():
                                                 }
                                                 posicionado = True
                                         else:
-                                            if y+size < 10:
+                                            if y+size-1 < 10:
                                                 self.ships[navio] = {
                                                     'inicio': (x, y),
                                                     'fim': (x, y+size),
@@ -148,13 +173,14 @@ class TCPClient():
                                     intercecao = True
                                     print('Interceção de Navios')
                                     break
-                    self.posiciona_no_campo(navio)
+                    self.posiciona_no_campo(navio, size,orientacao)
+                    print('\t{} posicionado!'.format(navio))
     
-    def posiciona_no_campo(self, navio):
+    def posiciona_no_campo(self, navio, size, orientacao):
+        if orientacao:
+            for x in range(self.ships[navio]['inicio'][0],self.ships[navio]['fim'][0]):
+                self.grid[x][self.ships[navio]['inicio'][1]] = "O"
+        else:
+            for y in range(self.ships[navio]['inicio'][1], self.ships[navio]['fim'][1]):
+                self.grid[self.ships[navio]['inicio'][0]][y] = "O"
         pass
-
-if __name__ == "__main__":
-    HOST = input("Insira o endereco IP: ")            # Endereco IP do Servidor
-    PORT = input("Insira a porta de comunicacao: ")   # Porta que o Servidor esta
-
-    pass
