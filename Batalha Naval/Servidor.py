@@ -32,6 +32,7 @@ class TCPServer():
     def start(self):
         self.create_ships()
         print('ships created')
+        self.print_grid()
         begining = time.time()
         print('Start at', begining)
         while True:
@@ -52,100 +53,91 @@ class TCPServer():
         self.tcp.close()
         print('Connection on {}:{} closed'.format(self.HOST, self.PORT))
 
+    def print_grid(self):
+        print('y/x', '\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t'.format(*range(10)))
+        for y in range(10):
+            print(y, '|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|\t{}\t|'.format(*[self.grid[x][y] for x in range(10)]))
+    
     def create_ships(self):
         print('Posicionando Frota')
+        lista_barcos = [{'nome': 'porta-aviao', 'size': 5, 'quantia': 1}, {'nome': 'navio-tanque', 'size': 4, 'quantia': 2},
+            {'nome': 'contratorpedeiro', 'size': 3, 'quantia': 3}, {'nome': 'submarino', 'size': 2, 'quantia': 4}]
+        
+        for barco in lista_barcos:
+            for i in range(barco['quantia']):
+                navio = barco['nome']+str(i)
+                print("\tposicionando {}".format(navio))
+                size = barco['size']
+                intercecao = True
+                while intercecao:
+                    x = random.randrange(0,10)
+                    y = random.randrange(0,10)
+                    orientacao = bool(random.randint(0, int(time.time()))%2)
+                    posicionado = False
+                    while not posicionado:
+                        if x>= 0:
+                            if x < 10:
+                                if y >= 0:
+                                    if y < 10:
+                                        if orientacao:
+                                            if x+size-1 < 10:
+                                                self.ships[navio] = {
+                                                    'inicio': (x, y),
+                                                    'fim': (x+size, y),
+                                                    'size': size,
+                                                    'hits': []
+                                                }
+                                                posicionado = True
+                                            else:
+                                                distancia = 10 - size -1
+                                                self.ships[navio] = {
+                                                    'inicio': (distancia, y),
+                                                    'fim': (distancia+size, y),
+                                                    'size': size,
+                                                    'hits': []
+                                                }
+                                                posicionado = True
+                                        else:
+                                            if y+size-1 < 10:
+                                                self.ships[navio] = {
+                                                    'inicio': (x, y),
+                                                    'fim': (x, y+size),
+                                                    'size': size,
+                                                    'hits': []
+                                                }
+                                                posicionado = True
+                                            else:
+                                                distancia = 10 - size -1
+                                                self.ships[navio] = {
+                                                    'inicio': (x, distancia),
+                                                    'fim': (x, distancia+size),
+                                                    'size': size,
+                                                    'hits': []
+                                                }
+                                                posicionado = True
+                                    else:
+                                        y = 9
+                                else:
+                                    y = 0
+                            else:
+                                x = 9
+                        else:
+                            x = 0
+                    intercecao = False
+                    for key in self.ships.keys():
+                        if key != navio:
+                            if intercecao and \
+                                (self.ships[key]['inicio'][1] >=self.ships[navio]['inicio'][1] >= self.ships[key]['inicio'][1] or \
+                                    self.ships[key]['inicio'][1] >=self.ships[navio]['fim'][1] >= self.ships[key]['inicio'][1]) and \
+                                        (self.ships[key]['inicio'][0] >=self.ships[navio]['inicio'][0] >= self.ships[key]['inicio'][0] or \
+                                            self.ships[key]['inicio'][0] >=self.ships[navio]['fim'][0] >= self.ships[key]['inicio'][0]):
+                                    intercecao = True
+                                    print('Interceção de Navios')
+                                    break
+                    self.posiciona_no_campo(navio, orientacao)
+                    print('\t{} posicionado!'.format(navio))
 
-        self.ships['porta-aviao'] = {
-            'inicio': (random.randrange(0, 6), random.randrange(0, 10)),
-            'hits': [],
-            'size': 5
-        }
-        self.ships['porta-aviao'].update({
-            'fim': (self.ships['porta-aviao']['inicio'][0]+4, self.ships['porta-aviao']['inicio'][1])
-        })
-            
-        print('\tporta-aviao posicionado')
-
-        for x in range(2):
-            navio = 'navio-tanque{}'.format(x)
-            maxini = 7
-            size = 4
-            intercecao = True
-            while intercecao:
-                self.ships[navio] = {
-                    'inicio': (random.randrange(0, maxini), random.randrange(0, 10)),
-                    'hits': [],
-                    'size': size
-                }
-                
-                self.ships[navio].update({
-                    'fim': (self.ships[navio]['inicio'][0]+size-1, self.ships[navio]['inicio'][1])
-                })
-                intercecao = False
-                for key in self.ships.keys():
-                    if key != navio:
-                        if intercecao and self.ships[key]['inicio'][1] == self.ships[navio]['inicio'][1] and \
-                            (self.ships[key]['inicio'][0] >=self.ships[navio]['inicio'][0] >= self.ships[key]['inicio'][0] or \
-                                self.ships[key]['inicio'][0] >=self.ships[navio]['fim'][0] >= self.ships[key]['inicio'][0]):
-                                intercecao = True
-                                break
-            print('\t{} posicionado'.format(navio))
-
-        for x in range(3):
-            navio = 'contratorpedeiro{}'.format(x)
-            maxini = 8
-            size = 3
-            intercecao = True
-            while intercecao:
-                self.ships[navio] = {
-                    'inicio': (random.randrange(0, maxini), random.randrange(0, 10)),
-                    'hits': [],
-                    'size': size
-                }
-                
-                self.ships[navio].update({
-                    'fim': (self.ships[navio]['inicio'][0]+size-1, self.ships[navio]['inicio'][1])
-                })
-
-                intercecao = False
-                for key in self.ships.keys():
-                    if key != navio:
-                        if intercecao and self.ships[key]['inicio'][1] == self.ships[navio]['inicio'][1] and \
-                            (self.ships[key]['inicio'][0] >=self.ships[navio]['inicio'][0] >= self.ships[key]['inicio'][0] or \
-                                self.ships[key]['inicio'][0] >=self.ships[navio]['fim'][0] >= self.ships[key]['inicio'][0]):
-                                intercecao = True
-                                break
-            print('\t{} posicionado'.format(navio))
-
-        for x in range(4):
-            navio = 'submarino{}'.format(x)
-            maxini = 9
-            size = 2
-            intercecao = True
-            while intercecao:
-                self.ships[navio] = {
-                    'inicio': (random.randrange(0, maxini), random.randrange(0, 10)),
-                    'hits': [],
-                    'size': size
-                }
-                
-                self.ships[navio].update({
-                    'fim': (self.ships[navio]['inicio'][0]+size-1, self.ships[navio]['inicio'][1])
-                })
-
-                intercecao = False
-                for key in self.ships.keys():
-                    if key != navio:
-                        if intercecao and self.ships[key]['inicio'][1] == self.ships[navio]['inicio'][1] and \
-                            ((self.ships[key]['fim'][0] >= self.ships[navio]['inicio'][0] and self.ships[navio]['inicio'][0] >= self.ships[key]['inicio'][0]) or \
-                                (self.ships[key]['fim'][0] >= self.ships[navio]['fim'][0] and self.ships[navio]['fim'][0] >= self.ships[key]['inicio'][0])):
-                                intercecao = True
-                                break
-            print('\t{} posicionado'.format(navio))
-        # print(self.ships)
-        return    
-
-    def posiciona_no_campo(self, navio):
+    def posiciona_no_campo(self, navio, orientacao):
         if orientacao:
             for x in range(self.ships[navio]['inicio'][0],self.ships[navio]['fim'][0]):
                 self.grid[x][self.ships[navio]['inicio'][1]] = "O"
@@ -159,7 +151,7 @@ class TCPServer():
         for key in self.ships.keys():
             print('is {} hit?'.format(key))
             if y == self.ships[key]['inicio'][1] and\
-                (self.ships[key]['inicio'][0] >= x and\
+                (self.ships[key]['fim'][0] >= x and\
                  x >= self.ships[key]['inicio'][0]):
                 if '{},{}'.format(x,y) not in self.ships[key]['hits']:
                     print('HIT!')

@@ -30,12 +30,12 @@ class TCPClient():
 
     def is_hit(self, x, y):
         for key in self.ships.keys():
-            if self.ships[key]['fim'][1] >= y >= self.ships[key]['fim'][1] and\
-                self.ships[key]['inicio'][0] >= x >= self.ships[key]['fim'][0]:
+            if self.ships[key]['fim'][1] >= y >= self.ships[key]['inicio'][1] and\
+                self.ships[key]['fim'][0] >= x >= self.ships[key]['inicio'][0]:
                 if str('{},{}'.format(x,y)) not in self.ships[key]['hits']:
                     self.ships[key]['hits'].append(str('{},{}'.format(x,y)))
                     print('Oh no, {} got hit!'.format(key))
-                    grid[x][y] = 'HIT'
+                    self.grid[x][y] = 'HIT'
                     if len(self.ships[key]['hits']) == self.ships[key]['size']:
                         print('MAYDAY MAYDAY! Ship sunk....')
                         self.ships.pop(key)
