@@ -34,7 +34,7 @@ class TCPClient():
                 self.ships[key]['fim'][0] >= x >= self.ships[key]['inicio'][0]:
                 if str('{},{}'.format(x,y)) not in self.ships[key]['hits']:
                     self.ships[key]['hits'].append(str('{},{}'.format(x,y)))
-                    print('Oh no, {} got hit!'.format(key))
+                    print('Oh no, {} was hit!'.format(key))
                     self.grid[x][y] = 'HIT'
                     if len(self.ships[key]['hits']) == self.ships[key]['size']:
                         print('MAYDAY MAYDAY! Ship sunk....')
@@ -121,7 +121,7 @@ class TCPClient():
                                             if x+size-1 < 10:
                                                 self.ships[navio] = {
                                                     'inicio': (x, y),
-                                                    'fim': (x+size, y),
+                                                    'fim': (x+size-1, y),
                                                     'size': size,
                                                     'hits': []
                                                 }
@@ -130,7 +130,7 @@ class TCPClient():
                                                 distancia = 10 - size -1
                                                 self.ships[navio] = {
                                                     'inicio': (distancia, y),
-                                                    'fim': (distancia+size, y),
+                                                    'fim': (distancia+size-1, y),
                                                     'size': size,
                                                     'hits': []
                                                 }
@@ -139,7 +139,7 @@ class TCPClient():
                                             if y+size-1 < 10:
                                                 self.ships[navio] = {
                                                     'inicio': (x, y),
-                                                    'fim': (x, y+size),
+                                                    'fim': (x, y+size-1),
                                                     'size': size,
                                                     'hits': []
                                                 }
@@ -148,7 +148,7 @@ class TCPClient():
                                                 distancia = 10 - size -1
                                                 self.ships[navio] = {
                                                     'inicio': (x, distancia),
-                                                    'fim': (x, distancia+size),
+                                                    'fim': (x, distancia+size-1),
                                                     'size': size,
                                                     'hits': []
                                                 }
@@ -177,9 +177,9 @@ class TCPClient():
     
     def posiciona_no_campo(self, navio, size, orientacao):
         if orientacao:
-            for x in range(self.ships[navio]['inicio'][0],self.ships[navio]['fim'][0]):
+            for x in range(self.ships[navio]['inicio'][0],self.ships[navio]['fim'][0]+1):
                 self.grid[x][self.ships[navio]['inicio'][1]] = "O"
         else:
-            for y in range(self.ships[navio]['inicio'][1], self.ships[navio]['fim'][1]):
+            for y in range(self.ships[navio]['inicio'][1], self.ships[navio]['fim'][1]+1):
                 self.grid[self.ships[navio]['inicio'][0]][y] = "O"
         pass

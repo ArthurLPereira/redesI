@@ -5,7 +5,22 @@ import random
 import json
 
 
-SHIP_TYPES = ['porta-aviao', ]
+def line_intersection(line1, line2):
+    xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
+    ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])
+
+    def det(a, b):
+        return a[0] * b[1] - a[1] * b[0]
+
+    div = det(xdiff, ydiff)
+    if div == 0:
+       raise Exception('lines do not intersect')
+
+    d = (det(*line1), det(*line2))
+    x = det(d, xdiff) / div
+    y = det(d, ydiff) / div
+    return x, y
+
 class TCPServer():
     tcp = None
     HOST = ''
@@ -14,10 +29,11 @@ class TCPServer():
     ships = {}
     shots = []
 
-    def __init__(self, host='', port=5000):
+    def __init__(self, host='', port=5000, random=False):
         if host is None or port is None:
             raise Exception('MISSING ARGUMENTS')
         
+        self.random = random
         self.grid = [[' ' for i in range(10)] for j in range(10)]
         self.tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.HOST = host if len(host) > 0 else socket.gethostbyname(socket.gethostname())
@@ -60,17 +76,24 @@ class TCPServer():
         print('Posicionando Frota')
         lista_barcos = [{'nome': 'porta-aviao', 'size': 5, 'quantia': 1}, {'nome': 'navio-tanque', 'size': 4, 'quantia': 2},
             {'nome': 'contratorpedeiro', 'size': 3, 'quantia': 3}, {'nome': 'submarino', 'size': 2, 'quantia': 4}]
-        
+        # Entrada padrão para teste
+        entrada_x = [0, 6, 0, 2, 5, 9, 8, 0, 3, 3]
+        entrada_y = [0, 0, 2, 4, 2, 4, 2, 6, 6, 9]
+        entrada_c = [1, 1, 1, 1, 0, 0, 1, 1, 1, 1]
+        ite = -1
         for barco in lista_barcos:
+
             for i in range(barco['quantia']):
                 navio = barco['nome']+str(i)
                 print("\tposicionando {}".format(navio))
                 size = barco['size']
                 intercecao = True
+                ite +=1
                 while intercecao:
-                    x = random.randrange(0,10)
-                    y = random.randrange(0,10)
-                    orientacao = bool(random.randint(0, int(time.time()))%2)
+                    x = random.randrange(0,10) if self.random else entrada_x[ite]
+                    y = random.randrange(0,10) if self.random else entrada_y[ite]
+                    orientacao = bool(random.randint(0, 99)%2) if self.random else entrada_c[ite]
+                    
                     posicionado = False
                     while not posicionado:
                         if x>= 0:
@@ -81,7 +104,7 @@ class TCPServer():
                                             if x+size-1 < 10:
                                                 self.ships[navio] = {
                                                     'inicio': (x, y),
-                                                    'fim': (x+size, y),
+                                                    'fim': (x+size-1, y),
                                                     'size': size,
                                                     'hits': []
                                                 }
@@ -90,7 +113,7 @@ class TCPServer():
                                                 distancia = 10 - size -1
                                                 self.ships[navio] = {
                                                     'inicio': (distancia, y),
-                                                    'fim': (distancia+size, y),
+                                                    'fim': (distancia+size-1, y),
                                                     'size': size,
                                                     'hits': []
                                                 }
@@ -99,7 +122,7 @@ class TCPServer():
                                             if y+size-1 < 10:
                                                 self.ships[navio] = {
                                                     'inicio': (x, y),
-                                                    'fim': (x, y+size),
+                                                    'fim': (x, y+size-1),
                                                     'size': size,
                                                     'hits': []
                                                 }
@@ -108,7 +131,7 @@ class TCPServer():
                                                 distancia = 10 - size -1
                                                 self.ships[navio] = {
                                                     'inicio': (x, distancia),
-                                                    'fim': (x, distancia+size),
+                                                    'fim': (x, distancia+size-1),
                                                     'size': size,
                                                     'hits': []
                                                 }
@@ -122,38 +145,42 @@ class TCPServer():
                         else:
                             x = 0
                     intercecao = False
-                    for key in self.ships.keys():
-                        if key != navio:
-                            if intercecao and \
-                                (self.ships[key]['inicio'][1] >=self.ships[navio]['inicio'][1] >= self.ships[key]['inicio'][1] or \
-                                    self.ships[key]['inicio'][1] >=self.ships[navio]['fim'][1] >= self.ships[key]['inicio'][1]) and \
-                                        (self.ships[key]['inicio'][0] >=self.ships[navio]['inicio'][0] >= self.ships[key]['inicio'][0] or \
-                                            self.ships[key]['inicio'][0] >=self.ships[navio]['fim'][0] >= self.ships[key]['inicio'][0]):
-                                    intercecao = True
+                    if self.random:
+                        for key in self.ships.keys():
+                            if key != navio:
+                                if  (self.ships[key]['fim'][1] >= self.ships[navio]['inicio'][1] >= self.ships[key]['inicio'][1] or \
+                                        self.ships[key]['fim'][1] >= self.ships[navio]['fim'][1] >= self.ships[key]['inicio'][1]) or \
+                                            (self.ships[key]['fim'][0] >= self.ships[navio]['inicio'][0] >= self.ships[key]['inicio'][0] or \
+                                                self.ships[key]['fim'][0] >= self.ships[navio]['fim'][0] >= self.ships[key]['inicio'][0]):
+                                        intercecao = True
                 self.posiciona_no_campo(navio, orientacao)
-                print('\t{} posicionado!'.format(navio))
+                # print('\t{} posicionado!'.format(navio))
 
     def posiciona_no_campo(self, navio, orientacao):
         if orientacao:
-            for x in range(self.ships[navio]['inicio'][0],self.ships[navio]['fim'][0]+1):
+
+            for x in range(self.ships[navio]['inicio'][0], self.ships[navio]['fim'][0]+1):
+                # print('O')
                 self.grid[x][self.ships[navio]['inicio'][1]] = "O"
         else:
             for y in range(self.ships[navio]['inicio'][1], self.ships[navio]['fim'][1]+1):
+                # print('O')
                 self.grid[self.ships[navio]['inicio'][0]][y] = "O"
         pass
 
     def is_hit(self, x, y):
         for key in self.ships.keys():
-            if y == self.ships[key]['inicio'][1] and\
-                (self.ships[key]['fim'][0] >= x and\
-                 x >= self.ships[key]['inicio'][0]):
-                if '{},{}'.format(x,y) not in self.ships[key]['hits']:
-                    print('{} was HIT!'.format(key))
-                    self.ships[key]['hits'].append('{},{}'.format(x,y))
+            if self.ships[key]['fim'][1] >= y >= self.ships[key]['inicio'][1] and\
+                self.ships[key]['fim'][0] >= x >= self.ships[key]['inicio'][0]:
+                if str('{},{}'.format(x,y)) not in self.ships[key]['hits']:
+                    self.ships[key]['hits'].append(str('{},{}'.format(x,y)))
+                    print('{} was hit!'.format(key))
+                    self.grid[x][y] = 'HIT'
                     if len(self.ships[key]['hits']) == self.ships[key]['size']:
-                        print('ship sunk')
+                        print('Ship sunk....')
                         self.ships.pop(key)
                     return True
+        self.grid[x][y] = 'X' if self.grid[x][y] != 'HIT' else self.grid[x][y]
         return False
 
     def shoot(self):
@@ -169,6 +196,8 @@ class TCPServer():
         print('Playing with', client)
         self.create_ships()
         print('ships created')
+        for ship in self.ships.keys():
+            print(ship, self.ships[ship])
         self.print_grid()
         while True:
             msg = con.recv(4096)
