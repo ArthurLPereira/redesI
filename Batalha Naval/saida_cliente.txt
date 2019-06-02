@@ -1,0 +1,81 @@
+Connected to 26.45.200.3:5000
+Para sair use CTRL+X
+
+Posicione sua Frota!
+        posicionando porta-aviao0
+         x:0
+         y:0
+         Orientacao(1 para horizontal e 0 para viertical):1
+        porta-aviao0 posicionado!
+        posicionando navio-tanque0
+         x:6
+         y:0
+         Orientacao(1 para horizontal e 0 para viertical):1
+        navio-tanque0 posicionado!
+        posicionando navio-tanque1
+         x:0
+         y:2
+         Orientacao(1 para horizontal e 0 para viertical):1
+        navio-tanque1 posicionado!
+        posicionando contratorpedeiro0
+         x:2
+         y:4
+         Orientacao(1 para horizontal e 0 para viertical):1
+        contratorpedeiro0 posicionado!
+        posicionando contratorpedeiro1
+         x:5
+         y:2
+         Orientacao(1 para horizontal e 0 para viertical):0
+        contratorpedeiro1 posicionado!
+        posicionando contratorpedeiro2
+         x:9
+         y:4
+         Orientacao(1 para horizontal e 0 para viertical):0
+        contratorpedeiro2 posicionado!
+        posicionando submarino0
+         x:8
+         y:2
+         Orientacao(1 para horizontal e 0 para viertical):1
+        submarino0 posicionado!
+        posicionando submarino1
+         x:0
+         y:6
+         Orientacao(1 para horizontal e 0 para viertical):1
+        submarino1 posicionado!
+        posicionando submarino2
+         x:3
+         y:6
+         Orientacao(1 para horizontal e 0 para viertical):1
+        submarino2 posicionado!
+        posicionando submarino3
+         x:3
+         y:9
+         Orientacao(1 para horizontal e 0 para viertical):1
+        submarino3 posicionado!
+Pressione enter para continuar!
+
+Campo Adversário
+y/x     0               1               2               3               4               5           6           7               8               9
+0 |             |               |               |               |               |               |       |               |               |               |
+1 |             |               |               |               |               |               |       |               |               |               |
+2 |             |               |               |               |               |               |       |               |               |               |
+3 |             |               |               |               |               |               |       |               |               |               |
+4 |             |               |               |               |               |               |       |               |               |               |
+5 |             |               |               |               |               |               |       |               |               |               |
+6 |             |               |               |               |               |               |       |               |               |               |
+7 |             |               |               |               |               |               |       |               |               |               |
+8 |             |               |               |               |               |               |       |               |               |               |
+9 |             |               |               |               |               |               |       |               |               |               |
+
+Seu Campo
+y/x     0               1               2               3               4               5           6           7               8               9
+0 |     O       |       O       |       O       |       O       |       O       |               |   O   |       O       |       O       |       O       |
+1 |             |               |               |               |               |               |       |               |               |               |
+2 |     O       |       O       |       O       |       O       |               |       O       |       |               |       O       |       O       |
+3 |             |               |               |               |               |       O       |       |               |               |               |
+4 |             |               |       O       |       O       |       O       |       O       |       |               |               |       O       |
+5 |             |               |               |               |               |               |       |               |               |       O       |
+6 |     O       |       O       |               |       O       |       O       |               |       |               |               |       O       |
+7 |             |               |               |               |               |               |       |               |               |               |
+8 |             |               |               |               |               |               |       |               |               |               |
+9 |             |               |               |       O       |       O       |               |       |               |               |               |

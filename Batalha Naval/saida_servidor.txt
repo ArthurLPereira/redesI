@@ -1,0 +1,36 @@
+On HOST 127.0.1.1 listening to PORT 5000
+Start at 1559493809.8583453
+Playing with ('26.45.200.3', 54757)
+Posicionando Frota
+        posicionando porta-aviao0
+        porta-aviao0 posicionado!
+        posicionando navio-tanque0
+        navio-tanque0 posicionado!
+        posicionando navio-tanque1
+        navio-tanque1 posicionado!
+        posicionando contratorpedeiro0
+        contratorpedeiro0 posicionado!
+        posicionando contratorpedeiro1
+        contratorpedeiro1 posicionado!
+        posicionando contratorpedeiro2
+        contratorpedeiro2 posicionado!
+        posicionando submarino0
+        submarino0 posicionado!
+        posicionando submarino1
+        submarino1 posicionado!
+        posicionando submarino2
+        submarino2 posicionado!
+        posicionando submarino3
+        submarino3 posicionado!
+ships created
+y/x     0               1               2               3               4               5               6               7               8               9
+0 |             |               |       O       |       O       |       O       |       O       |       O       |       O       |       O       |               |
+1 |             |       O       |               |               |               |               |               |               |               |               |
+2 |             |       O       |       O       |       O       |       O       |               |               |               |               |               |
+3 |             |       O       |               |               |               |               |               |               |       O       |       O       |
+4 |             |       O       |               |               |               |       O       |       O       |       O       |               |               |
+5 |             |               |               |               |               |       O       |       O       |               |               |               |
+6 |             |               |               |               |               |       O       |               |               |               |               |
+7 |             |               |               |               |               |       O       |       O       |               |               |               |
+8 |             |               |               |               |               |       O       |       O       |               |               |               |
+9 |             |               |               |               |               |               |       O       |               |               |               |
